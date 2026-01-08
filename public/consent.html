@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Photography & Video Consent</title>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  <style>
+    body { font-family: Arial; max-width: 900px; margin: auto; }
+    .consent-box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      height: 260px;
+      overflow-y: scroll;
+    }
+    canvas { border: 1px solid #000; }
+    button { padding: 10px 15px; }
+  </style>
+</head>
+<body>
+
+<h2>PHOTOGRAPHY AND VIDEO CONSENT FORM</h2>
+
+<label>Event Name</label>
+<input id="eventName" required><br><br>
+
+<label>Venue</label>
+<input id="venue" required><br><br>
+
+<label>Date</label>
+<input type="date" id="eventDate" required><br><br>
+
+<h3>Purpose and Intended Use</h3>
+<div class="consent-box">
+  <!-- Paste full consent text here -->
+</div>
+
+<h3>Individual Consent</h3>
+<label><input type="checkbox" id="forSelf"> For self</label><br>
+<label><input type="checkbox" id="forChild"> For child(ren) under my care</label>
+
+<h3>Full Name</h3>
+<input id="fullName" required>
+
+<h3>Signature</h3>
+<canvas id="signature" width="400" height="150"></canvas><br>
+<button onclick="sigPad.clear()">Clear</button>
+
+<br><br>
+<label>
+  <input type="checkbox" id="confirm">
+  I confirm that I have read and understood this consent
+</label>
+
+<br><br>
+<button onclick="submitConsent()">Generate PDF</button>
+
+<script>
+  const sigPad = new SignaturePad(document.getElementById("signature"));
+
+  async function submitConsent() {
+    if (!confirm.checked) {
+      alert("Please confirm consent");
+      return;
+    }
+
+    if (sigPad.isEmpty()) {
+      alert("Signature required");
+      return;
+    }
+
+    const payload = {
+      eventName: eventName.value,
+      venue: venue.value,
+      eventDate: eventDate.value,
+      fullName: fullName.value,
+      forSelf: forSelf.checked,
+      forChild: forChild.checked,
+      signature: sigPad.toDataURL()
+    };
+
+    const res = await fetch("/generate-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Photography_Video_Consent.pdf";
+    a.click();
+  }
+</script>
+
+</body>
+</html>
