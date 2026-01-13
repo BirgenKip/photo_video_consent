@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Photography & Video Consent</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
 :root {
@@ -22,45 +22,47 @@ body {
 
 .container {
   max-width: 900px;
-  margin: 40px auto;
+  margin: 20px auto;
   background: #fff;
-  padding: 40px;
-  border-radius: 10px;
+  padding: 24px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin: 0;
+    padding: 16px;
+  }
 }
 
 .logo-header {
   display: flex;
   justify-content: center;
-  align-items: center;
   margin-bottom: 20px;
 }
 
 .logo-header img {
-  max-width: 180px;
-  height: auto;
+  max-width: 160px;
 }
 
 h1 {
   text-align: center;
   color: var(--aar-maroon);
-  margin-bottom: 5px;
-  font-size: 26px;
+  font-size: 22px;
 }
 
 .subtitle {
   text-align: center;
-  color: #666;
-  margin-bottom: 30px;
   font-size: 14px;
+  margin-bottom: 25px;
 }
 
 h2 {
   color: var(--aar-maroon);
   border-left: 6px solid var(--aar-orange);
   padding-left: 10px;
-  margin-top: 30px;
-  font-size: 20px;
+  margin-top: 25px;
+  font-size: 18px;
 }
 
 .section {
@@ -76,146 +78,102 @@ label {
 input[type="text"],
 input[type="date"] {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-bottom: 15px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--aar-orange);
-}
-
-p {
-  margin: 8px 0;
-}
-
-.checkbox-group {
-  margin-top: 10px;
+  font-size: 15px;
 }
 
 .checkbox-group label {
-  font-weight: normal;
-  display: block;
-  margin-bottom: 8px;
-}
-
-canvas {
-  border: 2px dashed var(--aar-maroon);
-  border-radius: 4px;
-  background: #fff;
-  cursor: crosshair;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
-.signature-actions {
-  margin-top: 10px;
+canvas {
+  width: 100%;
+  height: auto;
+  border: 2px dashed var(--aar-maroon);
+  border-radius: 4px;
+  background: #fff;
+  touch-action: none;
 }
 
 button {
   background: var(--aar-maroon);
   color: #fff;
   border: none;
-  padding: 12px 22px;
-  font-size: 15px;
+  padding: 14px;
+  font-size: 16px;
   border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+  width: 100%;
 }
 
 button:hover {
   background: var(--aar-orange);
 }
 
-.submit-btn {
-  width: 100%;
-  margin-top: 30px;
-  font-size: 16px;
+.signature-actions button {
+  width: auto;
+  margin-top: 10px;
 }
 
 .note {
   font-size: 13px;
-  color: #555;
-  margin-top: 20px;
   background: #fff6ef;
   padding: 15px;
   border-left: 5px solid var(--aar-orange);
-  border-radius: 4px;
+  margin-top: 20px;
 }
 
-/* Accordion styling */
 .accordion {
   border-top: 2px solid var(--aar-maroon);
-  padding-top: 15px;
   margin-top: 25px;
+  padding-top: 15px;
 }
 
 .accordion-title {
-  cursor: pointer;
-  color: var(--aar-maroon);
-  font-size: 18px;
-  user-select: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
   font-weight: 600;
-}
-
-.accordion-title:hover {
-  color: var(--aar-orange);
+  cursor: pointer;
 }
 
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease, padding 0.4s ease;
-  padding: 0 0;
+  transition: max-height 0.4s ease;
 }
 
 .accordion-content.open {
-  max-height: 800px;
-  padding: 15px 0 0 0;
+  max-height: 900px;
 }
 
-.accordion-content input[type="text"],
-.accordion-content input[type="date"] {
-  margin-bottom: 12px;
-}
-
-.accordion-content canvas {
-  margin-bottom: 8px;
-}
 .spinner {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border: 3px solid #ccc;
   border-top: 3px solid #000;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-left: 8px;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-</style>
-
+  </style>
 </head>
-<body>
 
+<body>
 <div class="container">
-     <div class="logo-header">
+
+  <div class="logo-header">
     <img src="/images/AAR Logo.png" alt="AAR Insurance Logo">
   </div>
+
   <h1>PHOTOGRAPHY AND VIDEO CONSENT FORM</h1>
-  <div class="subtitle">
-    AAR Insurance – Kenya Ltd (AIK)
-  </div>
+  <div class="subtitle">AAR Insurance – Kenya Ltd (AIK)</div>
 
   <div class="section">
     <label>Event Name</label>
@@ -229,216 +187,141 @@ button:hover {
   </div>
 
   <div class="section">
-    <h2>Purpose and Intended Use</h2>
-    <p>1. Photographers and/or videographers have been assigned to this event to capture imagery and videos that will be used for future promotion and marketing purposes by AAR Insurance – Kenya Ltd (AIK) and its affiliated third parties. </p>
-    <p>2. This form asks you to consent to the use of photographs and video footage that features you, or a child in your care, in our communications.</p>
-    <p>3. Your image or appearance in photography and video footage may be used in our printed publications for promotional purposes, in press releases, on our social media channels, in presentation materials and on our website. It may also appear in our advertising in the media or may be used by AAR Insurance – Kenya Ltd (AIK) contracted third parties for event-related promotion and marketing.</p>
-    <p>4. It is likely that your image or appearance in photography video footage will be published on our online platforms and as such will be subject to international data transfer. This means that it can be viewed and accessed from anywhere in the world and potentially from a country that does not have adequate data protection laws in place</p>
-    <p>5. The photographs and/or videos will remain the property of AAR Insurance – Kenya Ltd (AIK) and will only be used for promotional and marketing purposes.</p>
-    <p>6. Your other personal data will remain strictly confidential.</p>
-  </div>
-
-  <div class="section">
     <h2>Individual Consent</h2>
-    <p> Please tick the box(es) and sign below to provide consent
-I hereby provide my consent for the photos and/or video footage to be used in the Group’s promotional and marketing communications and publications relating to the event including on the AAR Insurance – Kenya Ltd (AIK) website, social media, press releases, print and advertising media.
-</p>
     <div class="checkbox-group">
-      <label>
-        <input type="checkbox" id="forSelf"> For self
-      </label>
-      <label>
-        <input type="checkbox" id="forChild"> For the child(ren) under my care
-      </label>
+      <label><input type="checkbox" id="forSelf"> For self</label>
+      <label><input type="checkbox" id="forChild"> For child(ren)</label>
     </div>
-  </div>
-
-  <div class="section">
-    <h2>Declaration</h2>
-    <p>1. I have the right to withdraw this consent at any time by sending an email to communications@aar.co.ke. If this consent is withdrawn, AAR Insurance – Kenya Ltd will not use your photo and/or video footage in any new publications or materials.</p>
-    <p>2. If the photos and/or video has already been published on print or social media prior to the withdrawal of this consent, they may be retained on existing publications and materials where it is not possible for AAR Insurance – Kenya Ltd (AIK) to withdraw/recall such publications and materials.</p>
-    <p>3. I will not receive any compensation, royalties or any other form of payment for the use of the photos and/or video footage.</p>
-    <p>4. The photos and/or video footage will be held by the AAR Insurance – Kenya Ltd (AIK) in accordance with the Data Protection Act, 2019.</p>
   </div>
 
   <div class="section">
     <label>Full Name</label>
     <input id="fullName" type="text">
   </div>
-<div>
-    <label>Date</label>
-    <input id="eventDate" type="date">
-  </div>
+
   <div class="section">
     <label>Signature</label>
-    <canvas id="signature" width="350" height="120"></canvas>
-
+    <canvas id="signature" width="600" height="180"></canvas>
     <div class="signature-actions">
       <button type="button" onclick="clearSignature()">Clear Signature</button>
     </div>
   </div>
 
-  <div class="note">
-    By signing above, you confirm that you have read, understood, and agreed to the terms outlined in this consent form.
+  <button onclick="submitForm()">Submit Consent</button>
+
+  <div id="loadingIndicator" style="display:none; margin-top:15px; text-align:center;">
+    <span>Submitting…</span><br>
+    <span class="spinner"></span>
   </div>
 
-  <button class="submit-btn" onclick="submitForm()">
-    Submit Consent
-  </button>
-
-
-   <div id="loadingIndicator" style="display:none; margin-top:10px;">
-  <span>Submitting…</span>
-  <span class="spinner"></span>
-</div>
-<div id="loadingIndicator" style="display:none;">Submitting...</div>
-
-<div class="section accordion">
-  <h2 class="accordion-title" onclick="toggleMinorSection()">
-    IF SUBJECT IS UNDER 18 YEARS OF AGE (click here)
-  </h2>
-
-  <div id="minorSection" class="accordion-content">
-    <p>
-      I confirm that I am the legal guardian of the child(ren) named below and
-      therefore authorized to provide consent on behalf of the child(ren).
-    </p>
-
-    <label>Name of Child(ren)</label>
-    <input id="childNames" name="childNames" type="text">
-
-    <label>Name of Guardian</label>
-    <input id="guardianName" name="guardianName" type="text">
-
-    <label>Relationship to Child(ren)</label>
-    <input id="relationship" name="relationship" type="text">
-
-    <label>Date</label>
-    <input id="guardianDate" name="guardianDate" type="date">
-
-    <label>Signature</label><br>
-    <canvas id="guardianSignature" width="300" height="100"></canvas>
-    <button type="button" onclick="clearGuardianSignature()">Clear Signature</button>
-    <div class="note">
-    By signing above, you confirm that you have read, understood, and agreed to the terms outlined in this consent form.
+  <div class="accordion">
+    <div class="accordion-title" onclick="toggleMinorSection()">
+      IF SUBJECT IS UNDER 18 YEARS (click)
     </div>
 
-    <button class="submit-btn" onclick="submitForm()">
-    Submit Consent
-  </button>
+    <div id="minorSection" class="accordion-content">
+      <label>Child Name(s)</label>
+      <input id="childNames" type="text">
+
+      <label>Guardian Name</label>
+      <input id="guardianName" type="text">
+
+      <label>Relationship</label>
+      <input id="relationship" type="text">
+
+      <label>Signature</label>
+      <canvas id="guardianSignature" width="600" height="180"></canvas>
+      <button onclick="clearGuardianSignature()">Clear Signature</button>
+    </div>
   </div>
-</div>
+
 </div>
 
 <script>
-  // -------- Main user signature --------
-  const canvas = document.getElementById("signature");
+function setupSignature(canvas) {
   const ctx = canvas.getContext("2d");
   let drawing = false;
 
-  canvas.onmousedown = () => { drawing = true; ctx.beginPath(); };
-  canvas.onmouseup = () => drawing = false;
-  canvas.onmousemove = e => {
+  const start = e => {
+    drawing = true;
+    ctx.beginPath();
+    const p = getPos(e);
+    ctx.moveTo(p.x, p.y);
+  };
+
+  const move = e => {
     if (!drawing) return;
-    ctx.lineTo(e.offsetX, e.offsetY);
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
     ctx.stroke();
   };
-  function clearSignature() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-  }
 
-  // -------- Guardian signature --------
-  const guardianCanvas = document.getElementById("guardianSignature");
-  const guardianCtx = guardianCanvas.getContext("2d");
-  let guardianDrawing = false;
+  const stop = () => drawing = false;
 
-  guardianCanvas.onmousedown = () => { guardianDrawing = true; guardianCtx.beginPath(); };
-  guardianCanvas.onmouseup = () => guardianDrawing = false;
-  guardianCanvas.onmousemove = e => {
-    if (!guardianDrawing) return;
-    guardianCtx.lineTo(e.offsetX, e.offsetY);
-    guardianCtx.stroke();
+  const getPos = e => {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
   };
-  function clearGuardianSignature() {
-    guardianCtx.clearRect(0, 0, guardianCanvas.width, guardianCanvas.height);
-    guardianCtx.beginPath();
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  canvas.addEventListener("mouseup", stop);
+  canvas.addEventListener("touchstart", start);
+  canvas.addEventListener("touchmove", move);
+  canvas.addEventListener("touchend", stop);
+
+  return () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+const clearSignature = setupSignature(document.getElementById("signature"));
+const clearGuardianSignature = setupSignature(document.getElementById("guardianSignature"));
+
+function toggleMinorSection() {
+  document.getElementById("minorSection").classList.toggle("open");
+}
+
+async function submitForm() {
+  const loader = document.getElementById("loadingIndicator");
+  loader.style.display = "block";
+
+  const payload = {
+    eventName: document.getElementById("eventName").value.trim(),
+    venue: document.getElementById("venue").value.trim(),
+    eventDate: document.getElementById("eventDate").value,
+    fullName: document.getElementById("fullName").value.trim(),
+    forSelf: document.getElementById("forSelf").checked,
+    forChild: document.getElementById("forChild").checked,
+    signature: document.getElementById("signature").toDataURL("image/png"),
+    childNames: document.getElementById("childNames").value.trim(),
+    guardianName: document.getElementById("guardianName").value.trim(),
+    relationship: document.getElementById("relationship").value.trim(),
+    childSignature: document
+      .getElementById("guardianSignature")
+      .toDataURL("image/png")
+  };
+
+  try {
+    const response = await fetch("/generate-pdf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error("Submission failed");
+
+    const result = await response.json();
+    alert(result.message);
+    location.reload();
+
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    loader.style.display = "none";
   }
-
-  // -------- Accordion toggle for minor section --------
-  function toggleMinorSection() {
-    document.getElementById("minorSection").classList.toggle("open");
-  }
-
-  // -------- Submit form --------
-  async function submitForm() {
-    const loader = document.getElementById("loadingIndicator");
-    loader.style.display = "block"; // SHOW spinner
-
-    const forChild = document.getElementById("forChild").checked;
-
-    const payload = {
-      eventName: document.getElementById("eventName").value.trim(),
-      venue: document.getElementById("venue").value.trim(),
-      eventDate: document.getElementById("eventDate").value.trim(),
-      fullName: document.getElementById("fullName").value.trim(),
-      forSelf: document.getElementById("forSelf").checked,
-      forChild,
-      signature: canvas.toDataURL("image/png"),
-      // Guardian fields
-      childNames: "",
-      guardianName: "",
-      relationship: "",
-      childSignature: null
-    };
-
-    if (forChild) {
-      payload.childNames = document.getElementById("childNames").value.trim();
-      payload.guardianName = document.getElementById("guardianName").value.trim();
-      payload.relationship = document.getElementById("relationship").value.trim();
-      payload.childSignature = guardianCanvas.toDataURL("image/png");
-    }
-
-    try {
-      const response = await fetch("/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) throw new Error("Submission failed");
-
-      // Expect JSON response from server
-      const result = await response.json(); // { message: "Submitted" }
-
-      // ✅ Show popup
-      alert(result.message);
-
-      // ✅ Clear all form fields
-      document.querySelectorAll("input").forEach(input => {
-        if (input.type === "checkbox" || input.type === "radio") {
-          input.checked = false;
-        } else {
-          input.value = "";
-        }
-      });
-
-      // ✅ Clear signature canvases
-      clearSignature();
-      clearGuardianSignature();
-
-      // ✅ Close minor section if open
-      const minorSection = document.getElementById("minorSection");
-      minorSection.classList.remove("open");
-
-    } catch (err) {
-      alert("Error: " + err.message);
-      console.error(err);
-    } finally {
-      loader.style.display = "none"; // HIDE spinner
-    }
-  }
+}
 </script>
-
 </body>
 </html>
