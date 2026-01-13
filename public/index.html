@@ -189,6 +189,20 @@ button:hover {
 .accordion-content canvas {
   margin-bottom: 8px;
 }
+.spinner {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #ccc;
+  border-top: 3px solid #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>
 
 </head>
@@ -272,6 +286,13 @@ I hereby provide my consent for the photos and/or video footage to be used in th
     Submit Consent
   </button>
 
+
+   <div id="loadingIndicator" style="display:none; margin-top:10px;">
+  <span>Submitting…</span>
+  <span class="spinner"></span>
+</div>
+<div id="loadingIndicator" style="display:none;">Submitting...</div>
+
 <div class="section accordion">
   <h2 class="accordion-title" onclick="toggleMinorSection()">
     IF SUBJECT IS UNDER 18 YEARS OF AGE (click here)
@@ -284,19 +305,19 @@ I hereby provide my consent for the photos and/or video footage to be used in th
     </p>
 
     <label>Name of Child(ren)</label>
-    <input id="childNames" type="text">
+    <input id="childNames" name="childNames" type="text">
 
     <label>Name of Guardian</label>
-    <input id="guardianName" type="text">
+    <input id="guardianName" name="guardianName" type="text">
 
     <label>Relationship to Child(ren)</label>
-    <input id="relationship" type="text">
+    <input id="relationship" name="relationship" type="text">
 
     <label>Date</label>
-    <input id="guardianDate" type="date">
+    <input id="guardianDate" name="guardianDate" type="date">
 
     <label>Signature</label><br>
-    <canvas id="guardianSignature" width="300" height="100"></canvas><br>
+    <canvas id="guardianSignature" width="300" height="100"></canvas>
     <button type="button" onclick="clearGuardianSignature()">Clear Signature</button>
     <div class="note">
     By signing above, you confirm that you have read, understood, and agreed to the terms outlined in this consent form.
@@ -315,42 +336,30 @@ I hereby provide my consent for the photos and/or video footage to be used in th
   const ctx = canvas.getContext("2d");
   let drawing = false;
 
-  canvas.onmousedown = () => {
-    drawing = true;
-    ctx.beginPath();
-  };
-
+  canvas.onmousedown = () => { drawing = true; ctx.beginPath(); };
   canvas.onmouseup = () => drawing = false;
-
   canvas.onmousemove = e => {
     if (!drawing) return;
     ctx.lineTo(e.offsetX, e.offsetY);
     ctx.stroke();
   };
-
   function clearSignature() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
   }
 
-  // -------- Guardian signature (child under 18) --------
+  // -------- Guardian signature --------
   const guardianCanvas = document.getElementById("guardianSignature");
   const guardianCtx = guardianCanvas.getContext("2d");
   let guardianDrawing = false;
 
-  guardianCanvas.onmousedown = () => {
-    guardianDrawing = true;
-    guardianCtx.beginPath();
-  };
-
+  guardianCanvas.onmousedown = () => { guardianDrawing = true; guardianCtx.beginPath(); };
   guardianCanvas.onmouseup = () => guardianDrawing = false;
-
   guardianCanvas.onmousemove = e => {
     if (!guardianDrawing) return;
     guardianCtx.lineTo(e.offsetX, e.offsetY);
     guardianCtx.stroke();
   };
-
   function clearGuardianSignature() {
     guardianCtx.clearRect(0, 0, guardianCanvas.width, guardianCanvas.height);
     guardianCtx.beginPath();
@@ -358,37 +367,37 @@ I hereby provide my consent for the photos and/or video footage to be used in th
 
   // -------- Accordion toggle for minor section --------
   function toggleMinorSection() {
-    const section = document.getElementById("minorSection");
-    section.classList.toggle("open");
+    document.getElementById("minorSection").classList.toggle("open");
   }
 
-  // -------- Submit form & generate PDF --------
+  // -------- Submit form --------
   async function submitForm() {
-    const signature = canvas.toDataURL("image/png");
+    const loader = document.getElementById("loadingIndicator");
+    loader.style.display = "block"; // SHOW spinner
 
-    // Collect guardian info if visible
-    let guardianData = null;
-    const minorSection = document.getElementById("minorSection");
-    if (minorSection.classList.contains("open")) {
-      guardianData = {
-        childNames: document.getElementById("childNames").value,
-        guardianName: document.getElementById("guardianName").value,
-        relationship: document.getElementById("relationship").value,
-        guardianDate: document.getElementById("guardianDate").value,
-        guardianSignature: guardianCanvas.toDataURL("image/png")
-      };
-    }
+    const forChild = document.getElementById("forChild").checked;
 
     const payload = {
-      eventName: document.getElementById("eventName").value,
-      venue: document.getElementById("venue").value,
-      eventDate: document.getElementById("eventDate").value,
-      fullName: document.getElementById("fullName").value,
+      eventName: document.getElementById("eventName").value.trim(),
+      venue: document.getElementById("venue").value.trim(),
+      eventDate: document.getElementById("eventDate").value.trim(),
+      fullName: document.getElementById("fullName").value.trim(),
       forSelf: document.getElementById("forSelf").checked,
-      forChild: document.getElementById("forChild").checked,
-      signature,
-      guardianData // will be null if minor section not open
+      forChild,
+      signature: canvas.toDataURL("image/png"),
+      // Guardian fields
+      childNames: "",
+      guardianName: "",
+      relationship: "",
+      childSignature: null
     };
+
+    if (forChild) {
+      payload.childNames = document.getElementById("childNames").value.trim();
+      payload.guardianName = document.getElementById("guardianName").value.trim();
+      payload.relationship = document.getElementById("relationship").value.trim();
+      payload.childSignature = guardianCanvas.toDataURL("image/png");
+    }
 
     try {
       const response = await fetch("/generate-pdf", {
@@ -397,14 +406,36 @@ I hereby provide my consent for the photos and/or video footage to be used in th
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error("PDF generation failed");
+      if (!response.ok) throw new Error("Submission failed");
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      window.open(url);
+      // Expect JSON response from server
+      const result = await response.json(); // { message: "Submitted" }
+
+      // ✅ Show popup
+      alert(result.message);
+
+      // ✅ Clear all form fields
+      document.querySelectorAll("input").forEach(input => {
+        if (input.type === "checkbox" || input.type === "radio") {
+          input.checked = false;
+        } else {
+          input.value = "";
+        }
+      });
+
+      // ✅ Clear signature canvases
+      clearSignature();
+      clearGuardianSignature();
+
+      // ✅ Close minor section if open
+      const minorSection = document.getElementById("minorSection");
+      minorSection.classList.remove("open");
+
     } catch (err) {
-      alert("Error generating PDF: " + err.message);
+      alert("Error: " + err.message);
       console.error(err);
+    } finally {
+      loader.style.display = "none"; // HIDE spinner
     }
   }
 </script>
