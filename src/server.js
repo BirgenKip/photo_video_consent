@@ -233,7 +233,7 @@ I understand that:
 
     await transporter.sendMail({
       from: '"Consent System" <aaronboarding@aar.co.ke>',
-      to: "godfreykipbirgen@gmail.com",
+      to: "rmuthami@aar.co.ke",
       subject: "Signed Photography & Video Consent Form",
       text: "Attached is the signed consent form.",
       attachments: [{
