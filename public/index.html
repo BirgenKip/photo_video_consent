@@ -162,6 +162,12 @@ button:hover {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+.divider {
+  margin: 25px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
   </style>
 </head>
 
@@ -187,11 +193,32 @@ button:hover {
   </div>
 
   <div class="section">
+    <h2>Purpose and Intended Use</h2>
+    <p>1. Photographers and/or videographers have been assigned to this event to capture imagery and videos that will be used for future promotion and marketing purposes by AAR Insurance – Kenya Ltd (AIK) and its affiliated third parties. </p>
+    <p>2. This form asks you to consent to the use of photographs and video footage that features you, or a child in your care, in our communications.</p>
+    <p>3. Your image or appearance in photography and video footage may be used in our printed publications for promotional purposes, in press releases, on our social media channels, in presentation materials and on our website. It may also appear in our advertising in the media or may be used by AAR Insurance – Kenya Ltd (AIK) contracted third parties for event-related promotion and marketing.</p>
+    <p>4. It is likely that your image or appearance in photography video footage will be published on our online platforms and as such will be subject to international data transfer. This means that it can be viewed and accessed from anywhere in the world and potentially from a country that does not have adequate data protection laws in place</p>
+    <p>5. The photographs and/or videos will remain the property of AAR Insurance – Kenya Ltd (AIK) and will only be used for promotional and marketing purposes.</p>
+    <p>6. Your other personal data will remain strictly confidential.</p>
+  </div>
+
+  <div class="section">
     <h2>Individual Consent</h2>
+    <p> Please tick the box(es) and sign below to provide consent
+    I hereby provide my consent for the photos and/or video footage to be used in the Group’s promotional and marketing communications and publications relating to the event including on the AAR Insurance – Kenya Ltd (AIK) website, social media, press releases, print and advertising media.
+    </p>
     <div class="checkbox-group">
       <label><input type="checkbox" id="forSelf"> For self</label>
       <label><input type="checkbox" id="forChild"> For child(ren)</label>
     </div>
+  </div>
+
+  <div class="section">
+    <h2>Declaration</h2>
+    <p>1. I have the right to withdraw this consent at any time by sending an email to communications@aar.co.ke. If this consent is withdrawn, AAR Insurance – Kenya Ltd will not use your photo and/or video footage in any new publications or materials.</p>
+    <p>2. If the photos and/or video has already been published on print or social media prior to the withdrawal of this consent, they may be retained on existing publications and materials where it is not possible for AAR Insurance – Kenya Ltd (AIK) to withdraw/recall such publications and materials.</p>
+    <p>3. I will not receive any compensation, royalties or any other form of payment for the use of the photos and/or video footage.</p>
+    <p>4. The photos and/or video footage will be held by the AAR Insurance – Kenya Ltd (AIK) in accordance with the Data Protection Act, 2019.</p>
   </div>
 
   <div class="section">
@@ -207,6 +234,10 @@ button:hover {
     </div>
   </div>
 
+   <div class="note">
+    By signing above, you confirm that you have read, understood, and agreed to the terms outlined in this consent form.
+  </div>
+
   <button onclick="submitForm()">Submit Consent</button>
 
   <div id="loadingIndicator" style="display:none; margin-top:15px; text-align:center;">
@@ -215,25 +246,41 @@ button:hover {
   </div>
 
   <div class="accordion">
-    <div class="accordion-title" onclick="toggleMinorSection()">
-      IF SUBJECT IS UNDER 18 YEARS (click)
-    </div>
-
-    <div id="minorSection" class="accordion-content">
-      <label>Child Name(s)</label>
-      <input id="childNames" type="text">
-
-      <label>Guardian Name</label>
-      <input id="guardianName" type="text">
-
-      <label>Relationship</label>
-      <input id="relationship" type="text">
-
-      <label>Signature</label>
-      <canvas id="guardianSignature" width="600" height="180"></canvas>
-      <button onclick="clearGuardianSignature()">Clear Signature</button>
-    </div>
+  <div class="accordion-title" onclick="toggleMinorSection()">
+    IF SUBJECT IS UNDER 18 YEARS (click to expand)
   </div>
+
+  <div id="minorSection" class="accordion-content">
+    <p>
+      I confirm that I am the legal guardian of the child(ren) named below and
+      that I am legally authorized to provide consent on their behalf.
+    </p>
+
+    <label for="childNames">Child Name(s)</label>
+    <input id="childNames" type="text" placeholder="e.g. John Doe, Jane Doe">
+
+    <label for="guardianName">Guardian Name</label>
+    <input id="guardianName" type="text" placeholder="Full name">
+
+    <label for="relationship">Relationship to Child</label>
+    <input id="relationship" type="text" placeholder="e.g. Parent, Legal Guardian">
+
+    <label>Guardian Signature</label>
+    <div class="signature-wrapper">
+      <canvas id="guardianSignature" width="600" height="180"></canvas>
+    </div>
+
+    <button type="button" onclick="clearGuardianSignature()">
+  Clear Signature
+</button>
+
+<hr class="divider">
+
+<button type="button" onclick="submitForm()" class="submit-btn">
+  Submit Consent
+</button>
+  </div>
+</div>
 
 </div>
 
@@ -285,24 +332,29 @@ async function submitForm() {
   const loader = document.getElementById("loadingIndicator");
   loader.style.display = "block";
 
-  const payload = {
-    eventName: document.getElementById("eventName").value.trim(),
-    venue: document.getElementById("venue").value.trim(),
-    eventDate: document.getElementById("eventDate").value,
-    fullName: document.getElementById("fullName").value.trim(),
-    forSelf: document.getElementById("forSelf").checked,
-    forChild: document.getElementById("forChild").checked,
-    signature: document.getElementById("signature").toDataURL("image/png"),
-    childNames: document.getElementById("childNames").value.trim(),
-    guardianName: document.getElementById("guardianName").value.trim(),
-    relationship: document.getElementById("relationship").value.trim(),
-    childSignature: document
-      .getElementById("guardianSignature")
-      .toDataURL("image/png")
-  };
-
   try {
-    const response = await fetch("/generate-pdf", {
+    const signatureCanvas = document.getElementById("signature");
+    const guardianCanvas = document.getElementById("guardianSignature");
+
+    const payload = {
+      eventName: document.getElementById("eventName").value.trim(),
+      venue: document.getElementById("venue").value.trim(),
+      eventDate: document.getElementById("eventDate").value,
+      fullName: document.getElementById("fullName").value.trim(),
+
+      forSelf: document.getElementById("forSelf").checked,
+      forChild: document.getElementById("forChild").checked,
+
+      signature: signatureCanvas.toDataURL("image/png"),
+
+      childNames: document.getElementById("childNames").value.trim(),
+      guardianName: document.getElementById("guardianName").value.trim(),
+      relationship: document.getElementById("relationship").value.trim(),
+
+      childSignature: guardianCanvas.toDataURL("image/png")
+    };
+
+    const res = await fetch("/generate-pdf", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -310,14 +362,17 @@ async function submitForm() {
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) throw new Error("Submission failed");
+    const result = await res.json();
 
-    const result = await response.json();
+    if (!res.ok) {
+      throw new Error(result.message || "Submission failed");
+    }
+
     alert(result.message);
     location.reload();
 
   } catch (err) {
-    alert(err.message);
+    alert(err.message || "Submission failed");
   } finally {
     loader.style.display = "none";
   }

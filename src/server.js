@@ -10,8 +10,10 @@ const app = express();
 // Middleware
 console.log("📦 Setting up middleware...");
 app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 const QRCode = require("qrcode");
+const router = express.Router();
 const nodemailer = require("nodemailer");
 
 
@@ -38,8 +40,12 @@ app.get("/", (req, res) => {
 
 app.post("/generate-pdf", async (req, res) => {
   console.log("➡️ POST /generate-pdf");
+  console.log("BODY RECEIVED:", req.body);
 
   try {
+    // ✅ SAFETY: ensure req.body exists
+    const body = req.body || {};
+
     // ===== DESTRUCTURE REQUEST BODY =====
     const {
       eventName = "",
@@ -49,11 +55,16 @@ app.post("/generate-pdf", async (req, res) => {
       forSelf = false,
       forChild = false,
       signature = null,
-      childNames = "", 
+      childNames = "",
       guardianName = "",
       relationship = "",
-      childSignature = null   // <-- added
-    } = req.body;
+      childSignature = null
+    } = body;
+
+    // ===== BASIC VALIDATION =====
+    if (!eventName || !fullName || !signature) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
     // ===== CREATE PDF =====
     const pdf = await PDFDocument.create();
@@ -76,7 +87,7 @@ app.post("/generate-pdf", async (req, res) => {
 
     // ===== HEADER =====
     const drawHeader = () => {
-      page.drawImage(logoImage, { x: marginX, y: 800, width: 120, height: 50 });
+      page.drawImage(logoImage, { x: marginX, y: 790, width: 120, height: 50 });
       page.drawText("PHOTOGRAPHY AND VIDEO CONSENT FORM", {
         x: marginX + 140,
         y: 800,
@@ -99,7 +110,6 @@ app.post("/generate-pdf", async (req, res) => {
     const drawParagraph = (text, size = 11, lineHeight = 16) => {
       text.split("\n").forEach(paragraph => {
         if (!paragraph.trim()) {
-          ensureSpace(lineHeight);
           y -= lineHeight;
           return;
         }
@@ -126,7 +136,6 @@ app.post("/generate-pdf", async (req, res) => {
     };
 
     // ===== EVENT DETAILS =====
-    ensureSpace(20);
     page.drawText(`EVENT NAME: ${eventName}`, { x: marginX, y, size: 11, font });
     y -= 18;
     page.drawText(`VENUE: ${venue}`, { x: marginX, y, size: 11, font });
@@ -139,12 +148,12 @@ app.post("/generate-pdf", async (req, res) => {
     y -= 18;
 
     drawParagraph(`
-1. Photographers and/or videographers have been assigned to this event to capture imagery and videos that will be used for future promotion and marketing purposes by AAR Insurance – Kenya Ltd (AIK) and its affiliated third parties. 
+1. Photographers and/or videographers have been assigned to this event to capture imagery and videos that will be used for future promotion and marketing purposes by AAR Insurance – Kenya Ltd (AIK) and its affiliated third parties.
 2. This form asks you to consent to the use of photographs and video footage that features you, or a child in your care, in our communications.
-3. Your image or appearance in photography and video footage may be used in our printed publications for promotional purposes, in press releases, on our social media channels, in presentation materials and on our website. It may also appear in our advertising in the media or may be used by AAR Insurance – Kenya Ltd (AIK) contracted third parties for event-related promotion and marketing.
-4. It is likely that your image or appearance in photography video footage will be published on our online platforms and as such will be subject to international data transfer. This means that it can be viewed and accessed from anywhere in the world and potentially from a country that does not have adequate data protection laws in place.
-5. The photographs and/or videos will remain the property of AAR Insurance – Kenya Ltd (AIK) and will only be used for promotional and marketing purposes.
-6. Your other personal data will remain strictly confidential.
+3. Your image or appearance may be used in print, social media, press releases, presentations, advertising, and online platforms.
+4. Online publication may involve international data transfer.
+5. All photos/videos remain the property of AAR Insurance – Kenya Ltd (AIK).
+6. Other personal data will remain confidential.
 `.trim());
 
     y -= 20;
@@ -154,7 +163,7 @@ app.post("/generate-pdf", async (req, res) => {
     y -= 18;
 
     drawParagraph(`
-I hereby provide my consent for the photos and/or video footage to be used in the Group’s promotional and marketing communications and publications relating to the event including on the AAR Insurance – Kenya Ltd (AIK) website, social media, press releases, print and advertising media.
+I hereby provide my consent for the photos and/or video footage to be used for promotional and marketing communications by AAR Insurance – Kenya Ltd (AIK).
 `.trim());
 
     y -= 10;
@@ -164,12 +173,13 @@ I hereby provide my consent for the photos and/or video footage to be used in th
     y -= 25;
 
     // ===== DECLARATION =====
-    drawParagraph(`I understand that:
-1. I have the right to withdraw this consent at any time by sending an email to communications@aar.co.ke. If this consent is withdrawn, AAR Insurance – Kenya Ltd will not use your photo and/or video footage in any new publications or materials.
-2. If the photos and/or video has already been published on print or social media prior to the withdrawal of this consent, they may be retained on existing publications and materials where it is not possible for AAR Insurance – Kenya Ltd (AIK) to withdraw/recall such publications and materials.
-3. I will not receive any compensation, royalties or any other form of payment for the use of the photos and/or video footage.
-4. The photos and/or video footage will be held by the AAR Insurance – Kenya Ltd (AIK) in accordance with the Data Protection Act, 2019.
-`);
+    drawParagraph(`
+I understand that:
+1. I may withdraw consent at any time.
+2. Previously published materials may not be withdrawn.
+3. No compensation will be received.
+4. Data will be handled in accordance with the Data Protection Act, 2019.
+`.trim());
 
     y -= 20;
 
@@ -179,58 +189,46 @@ I hereby provide my consent for the photos and/or video footage to be used in th
 
     if (signature?.startsWith("data:image/png;base64,")) {
       const sigImage = await pdf.embedPng(Buffer.from(signature.split(",")[1], "base64"));
-      ensureSpace(60);
       page.drawImage(sigImage, { x: marginX, y: y - 40, width: 160, height: 50 });
       y -= 60;
     }
 
     page.drawText(`Date: ${new Date().toLocaleDateString()}`, { x: marginX, y, size: 11, font });
-    y -= 25;
+    y -= 30;
 
-    // ===== UNDER 18 CONSENT =====
+    // ===== UNDER 18 SECTION =====
     if (forChild) {
-      ensureSpace(120);
-
       page.drawText("IF SUBJECT IS UNDER 18 YEARS OF AGE:", { x: marginX, y, size: 13, font: bold });
       y -= 18;
 
       page.drawText(
         "I confirm that I am the legal guardian of the child(ren) named below",
         { x: marginX, y, size: 11, font }
-        );
-        y -= 14; // move down for next line
-
-        // Second line
-        page.drawText(
+      );
+      y -= 14;
+      page.drawText(
         "and therefore authorized to provide consent on behalf of the child(ren).",
         { x: marginX, y, size: 11, font }
-        );
-y -= 18; // move down for next content
-      y -= 25;
+      );
+      y -= 20;
 
       page.drawText(`Name of Child(ren): ${childNames}`, { x: marginX, y, size: 11, font });
       y -= 18;
-
       page.drawText(`Name of Guardian: ${guardianName}`, { x: marginX, y, size: 11, font });
       y -= 18;
+      page.drawText(`Relationship: ${relationship}`, { x: marginX, y, size: 11, font });
+      y -= 25;
 
-      page.drawText(`Relationship to Child(ren): ${relationship}`, { x: marginX, y, size: 11, font });
-      y -= 18;
-
-      // ===== CHILD SIGNATURE =====
       if (childSignature?.startsWith("data:image/png;base64,")) {
         const childSigImage = await pdf.embedPng(Buffer.from(childSignature.split(",")[1], "base64"));
-        ensureSpace(60);
         page.drawImage(childSigImage, { x: marginX, y: y - 40, width: 160, height: 50 });
         y -= 60;
       }
 
       page.drawText(`Date: ${new Date().toLocaleDateString()}`, { x: marginX, y, size: 11, font });
-      y -= 25;
     }
 
-
-    // ===== SAVE & SEND =====
+    // ===== SAVE & EMAIL =====
     const pdfBytes = await pdf.save();
 
     await transporter.sendMail({
@@ -245,12 +243,11 @@ y -= 18; // move down for next content
       }]
     });
 
-    res.json({ message: "Submitted" });
-    
+    return res.json({ message: "Submitted" });
 
   } catch (err) {
     console.error("❌ PDF generation failed:", err);
-    res.status(500).send("Failed to generate PDF");
+    return res.status(500).json({ message: "Failed to generate PDF" });
   }
 });
 
